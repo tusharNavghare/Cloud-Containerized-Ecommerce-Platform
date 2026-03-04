@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-service
+  template:
+    metadata:
+      labels:
+        app: inventory-service
+    spec:
+      containers:
+        - name: inventory-service
+          image: "<image_url_from_ecr>"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: "<PORT_NUMBER>"
+          env:
+            - name: SPRING_APPLICATION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: SPRING_APPLICATION_NAME_INVENTORY
+            
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: REDIS_HOST
+
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: REDIS_PORT
+                  
+            - name: MQ_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: MQ_NAME
+                
+            - name: MQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: MQ_USERNAME
+                  
+            - name: MQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: MQ_PASSWORD
+                  
+            - name: PRODUCT_SVC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: PRODUCT_SVC_URL      
+
+            - name: EUREKA_CLIENT_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: EUREKA_CLIENT_ENABLED                   
+            
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_URL_INVENTORY   
+            
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_USERNAME
+            
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_PASSWORD
+            
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: JWT_SECRET

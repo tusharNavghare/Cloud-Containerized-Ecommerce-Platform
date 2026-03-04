@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: "<image_url_from_ecr>"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: "<PORT_NUMBER>"
+          env:
+            - name: SPRING_APPLICATION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: SPRING_APPLICATION_NAME_AUTH
+            
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_URL_AUTH    
+            
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_USERNAME
+            
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_PASSWORD
+            
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: JWT_SECRET

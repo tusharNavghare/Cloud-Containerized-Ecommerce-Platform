@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+        - name: product-service
+          image: product-service:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: "<PORT_NUMBER>"
+          env:
+            - name: SPRING_APPLICATION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: SPRING_APPLICATION_NAME_PRODUCT
+            
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: REDIS_HOST
+
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: shared-infra-config
+                  key: REDIS_PORT        
+            
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_URL_PRODUCT 
+            
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_USERNAME
+            
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: DB_PASSWORD
+            
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shared-infra-secret
+                  key: JWT_SECRET

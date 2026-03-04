@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: ecommerce
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      port: "<AMQP_PORT>"
+      targetPort: "<TARGET_AMQP_PORT>"
+    - name: management
+      port: "<UI_PORT>"
+      targetPort: "<TARGET_UI_PORT>"

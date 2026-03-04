@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-infra-config
+  namespace: ecommerce
+data:
+  POSTGRES_HOST: "<POSTGRES_HOST>"
+  POSTGRES_PORT: "<POSTGRES_PORT>"
+  POSTGRES_DB: "<POSTGRES_DB>"
+  
+  REDIS_HOST: "<REDIS_HOST>"
+  REDIS_PORT: "<REDIS_PORT>"
+  
+  RABBITMQ_HOST: "<RABBITMQ_HOST>"
+  RABBITMQ_PORT: "<RABBITMQ_PORT>"
+  
+  SPRING_APPLICATION_NAME_AUTH: "auth-service"
+  SPRING_APPLICATION_NAME_PRODUCT: "product-service"
+  SPRING_APPLICATION_NAME_ORDER: "order-service"
+  SPRING_APPLICATION_NAME_INVENTORY: "inventory-service"
+  
+  PRODUCT_SVC_URL: "<PRODUCT_SVC_URL>"
+  
+  EUREKA_CLIENT_ENABLED: "false"
+  
+  
+  
+  

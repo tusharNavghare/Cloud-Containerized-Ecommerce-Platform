@@ -1,0 +1,144 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: "<POSTGRES_USER>"
+      POSTGRES_PASSWORD: "<POSTGRES_PASSWORD>"
+      POSTGRES_DB: "<POSTGRES_DB>"
+    ports:
+      - "<TARGET_DB_PORT>:<DB_PORT>"
+    volumes:
+      - postgres-s-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5  
+        
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "<TARGET_REDIS_PORT>:<REDIS_PORT>"
+    command: ["redis-server", "--bind", "0.0.0.0"]  
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    ports:
+      - "<TARGET_AMQP_PORT>:<AMQP_PORT>"   # AMQP protocol
+      - "<TARGET_UI_PORT>:<UI_PORT>" # Management UI
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5 
+    environment:
+      RABBITMQ_DEFAULT_USER: "<RABBITMQ_DEFAULT_USER>"
+      RABBITMQ_DEFAULT_PASS: "<RABBITMQ_DEFAULT_PASS>"    
+  
+  
+  service-registry:
+    image: service-registry:1.0
+    container_name: service-registry
+    ports:
+      - "<TARGET_SR_PORT>:<SR_PORT>"
+  
+  
+  auth-service:
+    image: auth-service:1.0
+    container_name: auth-service
+    ports:
+      - "<TARGET_AUTH_PORT>:<AUTH_PORT>"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: auth-service
+      DB_URL: "<AUTH_DB_URL>"
+      DB_USERNAME: "<DB_USERNAME>"
+      DB_PASSWORD: "<DB_PASSWORD>"
+      JWT_SECRET: "<JWT_SECRET>"
+  
+  
+  product-service:
+    image: product-service:1.0
+    container_name: product-service
+    ports:
+      - "<TARGET_PRD_PORT>:<PRD_PORT>"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: product-service
+      DB_URL: "<PRD_DB_URL>"
+      DB_USERNAME: "<DB_USERNAME>"
+      DB_PASSWORD: "<DB_PASSWORD>"    
+      REDIS_HOST: "<REDIS_HOST>"
+      REDIS_PORT: "<REDIS_PORT>"
+      EUREKA_URL: "<EUREKA_URL>"
+      JWT_SECRET: "<JWT_SECRET>"
+
+
+  inventory-service:
+    image: inventory-service:1.0
+    container_name: inventory-service
+    ports:
+      - "<TARGET_INV_PORT>:<INV_PORT>"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy  
+    environment:
+      SPRING_APPLICATION_NAME: inventory-service
+      DB_URL: "<INV_DB_URL>"
+      DB_USERNAME: "<DB_USERNAME>"
+      DB_PASSWORD: "<DB_PASSWORD>"
+      REDIS_HOST: "<REDIS_HOST>"
+      REDIS_PORT: "<REDIS_PORT>"
+      RABBITMQ_HOST: "<RABBITMQ_HOST>"
+      RABBITMQ_PORT: "<RABBITMQ_PORT>"
+      RABBITMQ_USERNAME: "<RABBITMQ_USERNAME>"
+      RABBITMQ_PASSWORD: "<RABBITMQ_PASSWORD>"
+      EUREKA_URL: "<EUREKA_URL>"
+      JWT_SECRET: "<JWT_SECRET>"
+  
+  
+  order-service:
+    image: order-service:1.0
+    container_name: order-service
+    ports:
+      - "<TARGET_ORDER_PORT>:<ORDER_PORT>"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy  
+    environment:
+      SPRING_APPLICATION_NAME: order-service
+      DB_URL: "<ORDER_DB_URL>"
+      DB_USERNAME: "<DB_USERNAME>"
+      DB_PASSWORD: "<DB_PASSWORD>"    
+      RABBITMQ_HOST: "<RABBITMQ_HOST>"
+      RABBITMQ_PORT: "<RABBITMQ_PORT>"
+      RABBITMQ_USERNAME: "<RABBITMQ_USERNAME>"
+      RABBITMQ_PASSWORD: "<RABBITMQ_PASSWORD>"
+      EUREKA_URL: "<EUREKA_URL>"
+      JWT_SECRET: "<JWT_SECRET>"
+  
+  
+volumes:
+  postgres-s-data:
